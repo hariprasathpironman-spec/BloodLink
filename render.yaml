@@ -1,0 +1,32 @@
+services:
+  # Backend Flask Service
+  - type: web
+    name: blood-donor-backend
+    env: python
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn run:app"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite:///app.db # Change this if you switch to Postgres on Render
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # You MUST manually add your MAIL_USERNAME and MAIL_PASSWORD in the Render dashboard!
+
+  # Frontend Vite Service
+  - type: web
+    name: blood-donor-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: blood-donor-backend
+          envVarKey: RENDER_EXTERNAL_URL
